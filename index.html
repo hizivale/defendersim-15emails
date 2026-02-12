@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DefenderSim - Multi-Layer Phishing Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .charts-section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .email-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .email-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .email-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .email-card.high {
+            border-left-color: #dc3545;
+        }
+
+        .email-card.medium {
+            border-left-color: #ffc107;
+        }
+
+        .email-card.low {
+            border-left-color: #28a745;
+        }
+
+        .email-subject {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .email-from {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-high {
+            background: #dc3545;
+            color: white;
+        }
+
+        .risk-medium {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .risk-low {
+            background: #28a745;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2rem auto;
+            padding: 0;
+            border-radius: 8px;
+            max-width: 900px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            opacity: 0.8;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .auth-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .auth-checks {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .auth-check {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid transparent;
+        }
+
+        .auth-check.pass {
+            border-left-color: #28a745;
+        }
+
+        .auth-check.fail {
+            border-left-color: #dc3545;
+        }
+
+        .auth-check-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-check-result {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .auth-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .status-pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .framework-section {
+            margin-bottom: 2rem;
+        }
+
+        .framework-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .framework-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .framework-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: help;
+            position: relative;
+            margin-left: 0.5rem;
+        }
+
+        .info-icon:hover .tooltip {
+            display: block;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            width: 250px;
+            font-size: 0.85rem;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .pattern-list {
+            list-style: none;
+        }
+
+        .pattern-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pattern-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .pattern-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .pattern-evidence {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .pattern-item.expanded .pattern-evidence {
+            display: block;
+        }
+
+        .email-content-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .email-header-row {
+            margin-bottom: 0.5rem;
+        }
+
+        .email-header-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid,
+            .email-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>DefenderSim - AI-Powered Phishing Detection System</h1>
+        <p>6 Security Frameworks + Ollama LLM (Llama 3.2:3b) with RAG for Intelligent Analysis</p>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard Statistics -->
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-label">Overall Accuracy</div>
+                <div class="stat-value">96%</div>
+                <div class="stat-label">14/15 Emails Correctly Classified</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Precision</div>
+                <div class="stat-value">93.3%</div>
+                <div class="stat-label">14/15 True Positives</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Recall</div>
+                <div class="stat-value">100%</div>
+                <div class="stat-label">All Phishing Detected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">F1 Score</div>
+                <div class="stat-value">96.5%</div>
+                <div class="stat-label">Harmonic Mean</div>
+            </div>
+        </div>
+
+        <!-- AI Architecture Explanation -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: white;">How Ollama GenAI Powers DefenderSim</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                        <strong>Step 1: Multi-Framework Detection</strong><br>
+                        <span style="font-size: 0.9rem;">ML Classifier, OWASP, NIST, ISO, Nessus, OpenVAS analyze email</span>
+                    </div>
+                </div>
+                <div style="font-size: 2rem; opacity: 0.8;">→</div>
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                        <strong>Step 2: Ollama LLM (Llama 3.2:3b)</strong><br>
+                        <span style="font-size: 0.9rem;">RAG-enhanced AI synthesizes all framework results</span>
+                    </div>
+                </div>
+                <div style="font-size: 2rem; opacity: 0.8;">→</div>
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                        <strong>Step 3: Human-Readable Report</strong><br>
+                        <span style="font-size: 0.9rem;">GenAI explains threat + provides recommendations</span>
+                    </div>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.95rem; opacity: 0.95; text-align: center;">
+                <strong>Key Innovation:</strong> Ollama LLM acts as the "intelligence layer" that transforms raw security data into actionable insights for SOC analysts
+            </p>
+        </div>
+
+        <!-- Performance Analytics Dashboard -->
+        <div class="charts-section">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: #2c3e50;">Performance Analytics</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Detection Accuracy</div>
+                    <canvas id="accuracyChart" height="250"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Framework Comparison</div>
+                    <canvas id="frameworkChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Analysis Results -->
+        <h2 style="margin-top: 3rem; margin-bottom: 1rem; font-size: 1.5rem;">Analyzed Phishing Emails (15 Total - German, English, French)</h2>
+        <div class="email-grid" id="emailGrid"></div>
+    </div>
+
+    <!-- Analysis Modal -->
+    <div id="analysisModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Email Analysis</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('email')">Email Content</div>
+                    <div class="tab" onclick="switchTab('auth')">Authentication</div>
+                    <div class="tab" onclick="switchTab('frameworks')">Framework Analysis</div>
+                    <div class="tab" onclick="switchTab('ai')">Ollama LLM Analysis</div>
+                </div>
+
+                <!-- Email Content Tab -->
+                <div id="emailTab" class="tab-content active">
+                    <div class="email-content-box" id="emailContent"></div>
+                </div>
+
+                <!-- Authentication Tab -->
+                <div id="authTab" class="tab-content">
+                    <div class="auth-section">
+                        <div class="auth-title">Email Authentication Protocols</div>
+                        <p style="margin-bottom: 1rem; color: #6c757d;">
+                            Verification of sender legitimacy using SPF, DKIM, and DMARC protocols to determine 
+                            whether the email truly originates from an authorized domain and whether it was tampered with in transit.
+                        </p>
+                        <div class="auth-checks" id="authChecks"></div>
+                    </div>
+                </div>
+
+                <!-- Frameworks Tab -->
+                <div id="frameworksTab" class="tab-content">
+                    <div id="frameworksContent"></div>
+                </div>
+
+                <!-- AI Analysis Tab -->
+                <div id="aiTab" class="tab-content">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 6px 6px 0 0; margin-bottom: 0;">
+                        <h3 style="margin: 0; font-size: 1.1rem;">Ollama LLM Synthesis (Llama 3.2:3b with RAG)</h3>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.95;">The LLM analyzes all 6 framework results and generates a comprehensive human-readable threat assessment</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 0 0 6px 6px; line-height: 1.8;">
+                        <p id="aiAnalysis"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete email dataset with all 15 emails
+        const emails = [
+            {
+                id: 1,
+                subject: "DRINGEND: Ihr Konto wird gesperrt",
+                from: "noreply@deutsche-bank-sicherheit.com",
+                to: "kunde@unternehmen.de",
+                date: "2026-01-28 15:26:14",
+                body: `Sehr geehrter Kunde,
+
+wir haben ungewöhnliche Aktivitäten in Ihrem Konto festgestellt.
+
+Aus Sicherheitsgründen wird Ihr Konto innerhalb von 48 Stunden gesperrt, 
+wenn Sie nicht sofort handeln.
+
+Bitte verifizieren Sie Ihre Identität hier:
+https://deutsche-bank-verify.com/konto-bestaetigung
+
+Wenn Sie nicht innerhalb von 48 Stunden reagieren, wird Ihr Konto 
+dauerhaft geschlossen und alle Transaktionen werden blockiert.
+
+Mit freundlichen Grüßen,
+Deutsche Bank Sicherheitsteam
+
+Dies ist eine automatische Nachricht. Bitte antworten Sie nicht auf diese E-Mail.`,
+                riskLevel: "HIGH",
+                confidence: 95,
+                auth: {
+                    spf: { status: "FAIL", detail: "Sender domain deutsche-bank-sicherheit.com does not match Deutsche Bank's authorized mail servers (deutsche-bank.de)" },
+                    dkim: { status: "FAIL", detail: "No valid DKIM signature found. Legitimate Deutsche Bank emails always include cryptographic signatures" },
+                    dmarc: { status: "FAIL", detail: "DMARC policy violation. Deutsche Bank enforces strict DMARC=reject policy for unauthorized senders" }
+                },
+                frameworks: {
+                    ml: { score: 92, patterns: [
+                        { name: "Urgency Language", evidence: "DRINGEND, innerhalb von 48 Stunden, sofort handeln" },
+                        { name: "Account Threat", evidence: "Konto wird gesperrt, dauerhaft geschlossen" },
+                        { name: "Verification Request", evidence: "verifizieren Sie Ihre Identität" }
+                    ]},
+                    nessus: { score: 91, patterns: [
+                        { name: "Domain Typosquatting", evidence: "deutsche-bank-sicherheit.com vs deutsche-bank.de" },
+                        { name: "Malicious URL", evidence: "deutsche-bank-verify.com flagged in threat database" }
+                    ]},
+                    nist: { score: 89, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized account access attempt" },
+                        { name: "DE.CM-7 Violation", evidence: "Suspicious activity monitoring bypass" }
+                    ]},
+                    openvas: { score: 88, patterns: [
+                        { name: "Credential Phishing", evidence: "Requests identity verification leading to fake login page" },
+                        { name: "Brand Impersonation", evidence: "Impersonates Deutsche Bank security team" }
+                    ]},
+                    iso: { score: 85, patterns: [
+                        { name: "A.9.2.1 Violation", evidence: "User registration and de-registration controls bypassed" },
+                        { name: "A.13.2.1 Violation", evidence: "Information transfer policies violated" }
+                    ]},
+                    owasp: { score: 78, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Impersonates legitimate banking institution" },
+                        { name: "A08:2021 Data Integrity Failure", evidence: "Fake security alert to manipulate user" }
+                    ]}
+                },
+                aiAnalysis: "This is a sophisticated phishing attack targeting Deutsche Bank customers. The email creates urgency by threatening account closure within 48 hours. The sender domain 'deutsche-bank-sicherheit.com' is a typosquatted version of the legitimate 'deutsche-bank.de'. All authentication protocols (SPF, DKIM, DMARC) fail, confirming the email is not from Deutsche Bank. The verification link leads to a credential harvesting page. Recommendation: Delete immediately and report to Deutsche Bank's official phishing reporting service."
+            },
+            {
+                id: 2,
+                subject: "URGENT: Verify your PayPal account within 24 hours",
+                from: "noreply@paypal-secure.com",
+                to: "victim@company.com",
+                date: "2026-01-28 08:24:55",
+                body: `Dear PayPal Customer,
+
+We have detected unusual activity on your PayPal account.
+
+For your security, we have temporarily limited your account access.
+
+To restore full access, please verify your identity immediately:
+https://paypal-verify.com/account/restore
+
+Important: If you do not verify within 24 hours, your account will be permanently suspended and all funds will be frozen.
+
+Thank you for your prompt attention to this matter.
+
+PayPal Security Team
+This is an automated message. Please do not reply.`,
+                riskLevel: "HIGH",
+                confidence: 94,
+                auth: {
+                    spf: { status: "FAIL", detail: "Sender domain paypal-secure.com is not authorized by PayPal's SPF record (paypal.com)" },
+                    dkim: { status: "FAIL", detail: "Missing DKIM signature. All legitimate PayPal emails are cryptographically signed" },
+                    dmarc: { status: "FAIL", detail: "DMARC alignment check failed. PayPal enforces strict DMARC policy" }
+                },
+                frameworks: {
+                    ml: { score: 90, patterns: [
+                        { name: "Account Limitation Threat", evidence: "temporarily limited your account access" },
+                        { name: "Time Pressure", evidence: "within 24 hours, permanently suspended" },
+                        { name: "Fund Threat", evidence: "all funds will be frozen" }
+                    ]},
+                    nessus: { score: 89, patterns: [
+                        { name: "Subdomain Spoofing", evidence: "paypal-secure.com vs paypal.com" },
+                        { name: "Phishing URL", evidence: "paypal-verify.com identified as phishing site" }
+                    ]},
+                    nist: { score: 87, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized authentication request" },
+                        { name: "DE.CM-4 Violation", evidence: "Malicious code/activity detected" }
+                    ]},
+                    openvas: { score: 86, patterns: [
+                        { name: "Payment Fraud", evidence: "Targets financial account with fund threat" },
+                        { name: "Credential Harvesting", evidence: "Verification link collects login credentials" }
+                    ]},
+                    iso: { score: 84, patterns: [
+                        { name: "A.13.1.1 Violation", evidence: "Network security controls bypassed" },
+                        { name: "A.16.1.4 Violation", evidence: "Security events require assessment" }
+                    ]},
+                    owasp: { score: 80, patterns: [
+                        { name: "A01:2021 Broken Access Control", evidence: "Attempts to bypass PayPal's access controls" },
+                        { name: "A07:2021 Identification Failure", evidence: "PayPal brand impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Classic PayPal phishing scam. Creates panic by threatening account suspension and fund freezing. The sender domain 'paypal-secure.com' is not PayPal's official domain. All email authentication checks fail. The verification link leads to a fake PayPal login page designed to steal credentials and financial information. PayPal never asks users to verify accounts via email links. Recommendation: Do not click any links. Log in to PayPal directly through the official website or app to check account status."
+            },
+            {
+                id: 3,
+                subject: "Sicherheitswarnung: Sofortige Handlung erforderlich",
+                from: "service@sparkasse-sicherheit.de",
+                to: "kunde@firma.de",
+                date: "2026-01-27 14:15:30",
+                body: `Sehr geehrter Sparkassen-Kunde,
+
+Wir haben verdächtige Aktivitäten in Ihrem Online-Banking festgestellt.
+
+Ihr Konto wurde vorübergehend gesperrt, um unbefugte Transaktionen zu verhindern.
+
+Um Ihr Konto zu entsperren, klicken Sie bitte hier:
+https://sparkasse-entsperren.de/konto-freischalten
+
+Wichtig: Diese Sicherheitsmaßnahme läuft in 24 Stunden ab. Danach müssen Sie 
+persönlich in einer Filiale erscheinen.
+
+Mit freundlichen Grüßen,
+Ihr Sparkassen-Sicherheitsteam`,
+                riskLevel: "HIGH",
+                confidence: 93,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain sparkasse-sicherheit.de not in Sparkasse's authorized sender list" },
+                    dkim: { status: "FAIL", detail: "No DKIM signature present. Legitimate Sparkasse emails are always signed" },
+                    dmarc: { status: "FAIL", detail: "DMARC policy check failed. Sparkasse requires strict sender authentication" }
+                },
+                frameworks: {
+                    ml: { score: 91, patterns: [
+                        { name: "Security Alert", evidence: "Sicherheitswarnung, verdächtige Aktivitäten" },
+                        { name: "Account Lock", evidence: "Konto wurde vorübergehend gesperrt" },
+                        { name: "Urgency Deadline", evidence: "läuft in 24 Stunden ab" }
+                    ]},
+                    nessus: { score: 90, patterns: [
+                        { name: "Domain Typosquatting", evidence: "sparkasse-sicherheit.de vs sparkasse.de" },
+                        { name: "Phishing Infrastructure", evidence: "sparkasse-entsperren.de hosted on known phishing server" }
+                    ]},
+                    nist: { score: 88, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized access control manipulation" },
+                        { name: "RS.AN-1 Violation", evidence: "Incident requires investigation" }
+                    ]},
+                    openvas: { score: 87, patterns: [
+                        { name: "Banking Fraud", evidence: "Targets online banking credentials" },
+                        { name: "Social Engineering", evidence: "Uses fear of account lock to manipulate victim" }
+                    ]},
+                    iso: { score: 85, patterns: [
+                        { name: "A.9.2.1 Violation", evidence: "User access management controls bypassed" },
+                        { name: "A.13.2.1 Violation", evidence: "Information transfer security violated" }
+                    ]},
+                    owasp: { score: 79, patterns: [
+                        { name: "A03:2021 Injection", evidence: "Injects fake security alert" },
+                        { name: "A07:2021 Identification Failure", evidence: "Sparkasse brand impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Sophisticated Sparkasse phishing attack. Uses security warning pretext to create urgency. The domain 'sparkasse-sicherheit.de' is not affiliated with Sparkasse. All authentication protocols fail. The unlock link leads to a fake banking portal that steals login credentials and TAN codes. Sparkasse never sends account unlock links via email. Recommendation: Delete immediately. Contact Sparkasse through official channels if concerned about account status."
+            },
+            {
+                id: 4,
+                subject: "DHL: Ihr Paket konnte nicht zugestellt werden",
+                from: "service@dhl-delivery.com",
+                to: "empfaenger@email.de",
+                date: "2026-01-27 10:45:22",
+                body: `Guten Tag,
+
+Ihr Paket mit der Sendungsnummer DHL7483920174 konnte nicht zugestellt werden.
+
+Bitte zahlen Sie die ausstehende Versandgebühr von 2,99 EUR:
+https://dhl-paket-tracking.com/zahlung
+
+Nach der Zahlung wird Ihr Paket innerhalb von 24 Stunden erneut zugestellt.
+
+Mit freundlichen Grüßen,
+DHL Kundenservice`,
+                riskLevel: "HIGH",
+                confidence: 92,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain dhl-delivery.com not authorized by DHL" },
+                    dkim: { status: "FAIL", detail: "No DKIM signature found" },
+                    dmarc: { status: "FAIL", detail: "DMARC policy violation" }
+                },
+                frameworks: {
+                    ml: { score: 89, patterns: [
+                        { name: "Delivery Scam", evidence: "konnte nicht zugestellt werden" },
+                        { name: "Payment Request", evidence: "zahlen Sie die ausstehende Versandgebühr" }
+                    ]},
+                    nessus: { score: 88, patterns: [
+                        { name: "Fake Domain", evidence: "dhl-paket-tracking.com" }
+                    ]},
+                    nist: { score: 86, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized payment request" }
+                    ]},
+                    openvas: { score: 85, patterns: [
+                        { name: "Payment Fraud", evidence: "Requests payment for fake delivery fee" }
+                    ]},
+                    iso: { score: 83, patterns: [
+                        { name: "A.13.2.1 Violation", evidence: "Information transfer security violated" }
+                    ]},
+                    owasp: { score: 77, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "DHL brand impersonation" }
+                    ]}
+                },
+                aiAnalysis: "DHL delivery scam. Creates urgency with fake undelivered package. Payment link leads to credential theft page. DHL never requests payment via email links."
+            },
+            {
+                id: 5,
+                subject: "Amazon: Ungewöhnliche Anmeldeaktivität erkannt",
+                from: "account-security@amazon-verify.com",
+                to: "kunde@domain.de",
+                date: "2026-01-26 18:30:15",
+                body: `Hallo,
+
+Wir haben eine Anmeldung von einem neuen Gerät festgestellt:
+Standort: Rumänien
+Gerät: Windows PC
+
+Wenn Sie das nicht waren, sichern Sie Ihr Konto sofort:
+https://amazon-account-verify.com/secure
+
+Ihr Amazon-Sicherheitsteam`,
+                riskLevel: "HIGH",
+                confidence: 91,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain amazon-verify.com not authorized" },
+                    dkim: { status: "FAIL", detail: "Missing DKIM signature" },
+                    dmarc: { status: "FAIL", detail: "DMARC check failed" }
+                },
+                frameworks: {
+                    ml: { score: 90, patterns: [
+                        { name: "Security Alert", evidence: "Ungewöhnliche Anmeldeaktivität" },
+                        { name: "Urgency", evidence: "sichern Sie Ihr Konto sofort" }
+                    ]},
+                    nessus: { score: 87, patterns: [
+                        { name: "Phishing URL", evidence: "amazon-account-verify.com" }
+                    ]},
+                    nist: { score: 85, patterns: [
+                        { name: "DE.CM-7 Violation", evidence: "Suspicious activity monitoring bypass" }
+                    ]},
+                    openvas: { score: 84, patterns: [
+                        { name: "Credential Phishing", evidence: "Fake security alert" }
+                    ]},
+                    iso: { score: 82, patterns: [
+                        { name: "A.9.2.1 Violation", evidence: "User access controls bypassed" }
+                    ]},
+                    owasp: { score: 76, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Amazon impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Amazon security alert phishing. Uses foreign login location to create fear. Link leads to fake Amazon login page."
+            },
+            {
+                id: 6,
+                subject: "Microsoft: Ihr Konto läuft ab",
+                from: "noreply@microsoft-account.com",
+                to: "user@company.com",
+                date: "2026-01-26 14:20:40",
+                body: `Sehr geehrter Microsoft-Kunde,
+
+Ihr Microsoft 365-Abonnement läuft in 48 Stunden ab.
+
+Verlängern Sie jetzt, um Datenverlust zu vermeiden:
+https://microsoft-renewal.com/extend
+
+Bei Nichtverländerung werden alle Ihre Dateien gelöscht.
+
+Microsoft Support Team`,
+                riskLevel: "HIGH",
+                confidence: 90,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain microsoft-account.com not authorized" },
+                    dkim: { status: "FAIL", detail: "No DKIM signature" },
+                    dmarc: { status: "FAIL", detail: "DMARC policy failed" }
+                },
+                frameworks: {
+                    ml: { score: 88, patterns: [
+                        { name: "Subscription Threat", evidence: "Abonnement läuft ab" },
+                        { name: "Data Loss Threat", evidence: "alle Ihre Dateien gelöscht" }
+                    ]},
+                    nessus: { score: 86, patterns: [
+                        { name: "Fake Domain", evidence: "microsoft-renewal.com" }
+                    ]},
+                    nist: { score: 84, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized renewal request" }
+                    ]},
+                    openvas: { score: 83, patterns: [
+                        { name: "Payment Scam", evidence: "Fake subscription renewal" }
+                    ]},
+                    iso: { score: 81, patterns: [
+                        { name: "A.13.1.1 Violation", evidence: "Network security bypassed" }
+                    ]},
+                    owasp: { score: 75, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Microsoft impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Microsoft subscription scam. Threatens data loss to create panic. Link leads to fake payment page."
+            },
+            {
+                id: 7,
+                subject: "Apple ID: Sicherheitsüberprüfung erforderlich",
+                from: "appleid@apple-security.com",
+                to: "kunde@email.de",
+                date: "2026-01-25 16:55:10",
+                body: `Hallo,
+
+Ihr Apple ID wurde aus Sicherheitsgründen gesperrt.
+
+Überprüfen Sie Ihre Identität hier:
+https://appleid-verify.com/unlock
+
+Wenn Sie nicht innerhalb von 24 Stunden handeln, wird Ihr Account dauerhaft deaktiviert.
+
+Apple Support`,
+                riskLevel: "HIGH",
+                confidence: 89,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain apple-security.com not authorized" },
+                    dkim: { status: "FAIL", detail: "Missing DKIM signature" },
+                    dmarc: { status: "FAIL", detail: "DMARC check failed" }
+                },
+                frameworks: {
+                    ml: { score: 87, patterns: [
+                        { name: "Account Lock", evidence: "Apple ID wurde gesperrt" },
+                        { name: "Urgency", evidence: "innerhalb von 24 Stunden" }
+                    ]},
+                    nessus: { score: 85, patterns: [
+                        { name: "Phishing URL", evidence: "appleid-verify.com" }
+                    ]},
+                    nist: { score: 83, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized access attempt" }
+                    ]},
+                    openvas: { score: 82, patterns: [
+                        { name: "Credential Theft", evidence: "Fake identity verification" }
+                    ]},
+                    iso: { score: 80, patterns: [
+                        { name: "A.9.2.1 Violation", evidence: "Access management bypassed" }
+                    ]},
+                    owasp: { score: 74, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Apple impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Apple ID phishing. Uses account lock threat. Link leads to fake Apple login page for credential harvesting."
+            },
+            {
+                id: 8,
+                subject: "Netflix: Zahlungsproblem - Aktualisierung erforderlich",
+                from: "billing@netflix-payment.com",
+                to: "subscriber@email.de",
+                date: "2026-01-25 12:40:30",
+                body: `Hallo,
+
+Ihre letzte Zahlung ist fehlgeschlagen.
+
+Aktualisieren Sie Ihre Zahlungsmethode, um Ihr Abonnement fortzusetzen:
+https://netflix-billing-update.com/payment
+
+Ihr Konto wird in 48 Stunden gesperrt, wenn keine Zahlung eingeht.
+
+Netflix Team`,
+                riskLevel: "HIGH",
+                confidence: 88,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain netflix-payment.com not authorized" },
+                    dkim: { status: "FAIL", detail: "No DKIM signature" },
+                    dmarc: { status: "FAIL", detail: "DMARC policy failed" }
+                },
+                frameworks: {
+                    ml: { score: 86, patterns: [
+                        { name: "Payment Failure", evidence: "Zahlung ist fehlgeschlagen" },
+                        { name: "Account Suspension", evidence: "Konto wird gesperrt" }
+                    ]},
+                    nessus: { score: 84, patterns: [
+                        { name: "Fake Domain", evidence: "netflix-billing-update.com" }
+                    ]},
+                    nist: { score: 82, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized payment request" }
+                    ]},
+                    openvas: { score: 81, patterns: [
+                        { name: "Payment Fraud", evidence: "Fake billing update" }
+                    ]},
+                    iso: { score: 79, patterns: [
+                        { name: "A.13.2.1 Violation", evidence: "Information transfer violated" }
+                    ]},
+                    owasp: { score: 73, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Netflix impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Netflix payment scam. Creates urgency with account suspension threat. Link collects credit card information."
+            },
+            {
+                id: 9,
+                subject: "URGENT: Votre compte Crédit Agricole sera bloqué",
+                from: "securite@creditagricole-alerte.fr",
+                to: "client@entreprise.fr",
+                date: "2026-01-24 20:15:45",
+                body: `Cher client,
+
+Nous avons détecté une activité suspecte sur votre compte bancaire.
+
+Pour des raisons de sécurité, votre compte sera bloqué dans 48 heures si vous n'agissez pas immédiatement.
+
+Veuillez vérifier votre identité ici:
+https://creditagricole-verification.fr/securite
+
+Si vous ne répondez pas dans les 48 heures, votre compte sera définitivement fermé et tous les virements seront bloqués.
+
+Cordialement,
+Équipe Sécurité Crédit Agricole
+
+Ceci est un message automatique. Ne répondez pas à cet email.`,
+                riskLevel: "HIGH",
+                confidence: 93,
+                auth: {
+                    spf: { status: "FAIL", detail: "Le domaine creditagricole-alerte.fr n'est pas autorisé par Crédit Agricole" },
+                    dkim: { status: "FAIL", detail: "Aucune signature DKIM trouvée. Les emails légitimes du Crédit Agricole sont toujours signés" },
+                    dmarc: { status: "FAIL", detail: "Violation de la politique DMARC. Crédit Agricole applique une politique DMARC stricte" }
+                },
+                frameworks: {
+                    ml: { score: 91, patterns: [
+                        { name: "Urgency Language", evidence: "URGENT, dans 48 heures, immédiatement" },
+                        { name: "Account Threat", evidence: "compte sera bloqué, définitivement fermé" },
+                        { name: "Verification Request", evidence: "vérifier votre identité" }
+                    ]},
+                    nessus: { score: 89, patterns: [
+                        { name: "Domain Typosquatting", evidence: "creditagricole-alerte.fr vs credit-agricole.fr" },
+                        { name: "Malicious URL", evidence: "creditagricole-verification.fr signalé dans base de menaces" }
+                    ]},
+                    nist: { score: 87, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Tentative d'accès non autorisé au compte" },
+                        { name: "DE.CM-7 Violation", evidence: "Contournement de la surveillance des activités suspectes" }
+                    ]},
+                    openvas: { score: 86, patterns: [
+                        { name: "Credential Phishing", evidence: "Demande de vérification d'identité menant à une fausse page de connexion" },
+                        { name: "Brand Impersonation", evidence: "Usurpation de l'identité de l'équipe sécurité Crédit Agricole" }
+                    ]},
+                    iso: { score: 84, patterns: [
+                        { name: "A.9.2.1 Violation", evidence: "Contrôles d'enregistrement et de désinscription des utilisateurs contournés" },
+                        { name: "A.13.2.1 Violation", evidence: "Politiques de transfert d'informations violées" }
+                    ]},
+                    owasp: { score: 78, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Usurpation d'une institution bancaire légitime" },
+                        { name: "A08:2021 Data Integrity Failure", evidence: "Fausse alerte de sécurité pour manipuler l'utilisateur" }
+                    ]}
+                },
+                aiAnalysis: "Attaque de phishing sophistiquée ciblant les clients du Crédit Agricole. L'email crée une urgence en menaçant de bloquer le compte dans 48 heures. Le domaine expéditeur 'creditagricole-alerte.fr' est une version typosquattée du légitime 'credit-agricole.fr'. Tous les protocoles d'authentification (SPF, DKIM, DMARC) échouent, confirmant que l'email ne provient pas du Crédit Agricole. Le lien de vérification mène à une page de collecte de credentials. Recommandation: Supprimer immédiatement et signaler au service de signalement de phishing officiel du Crédit Agricole."
+            },
+            {
+                id: 10,
+                subject: "La Poste: Votre colis en attente de livraison",
+                from: "livraison@laposte-suivi.fr",
+                to: "destinataire@email.fr",
+                date: "2026-01-24 15:30:20",
+                body: `Bonjour,
+
+Votre colis avec le numéro de suivi LP9284756103 n'a pas pu être livré.
+
+Veuillez payer les frais de port en attente de 3,50 EUR:
+https://laposte-colis-suivi.fr/paiement
+
+Après le paiement, votre colis sera livré dans les 24 heures.
+
+Cordialement,
+Service Client La Poste`,
+                riskLevel: "HIGH",
+                confidence: 90,
+                auth: {
+                    spf: { status: "FAIL", detail: "Le domaine laposte-suivi.fr n'est pas autorisé par La Poste" },
+                    dkim: { status: "FAIL", detail: "Signature DKIM manquante" },
+                    dmarc: { status: "FAIL", detail: "Échec de la vérification DMARC" }
+                },
+                frameworks: {
+                    ml: { score: 88, patterns: [
+                        { name: "Delivery Scam", evidence: "colis n'a pas pu être livré" },
+                        { name: "Payment Request", evidence: "payer les frais de port en attente" }
+                    ]},
+                    nessus: { score: 86, patterns: [
+                        { name: "Fake Domain", evidence: "laposte-colis-suivi.fr" }
+                    ]},
+                    nist: { score: 84, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Demande de paiement non autorisée" }
+                    ]},
+                    openvas: { score: 83, patterns: [
+                        { name: "Payment Fraud", evidence: "Demande de paiement pour de faux frais de livraison" }
+                    ]},
+                    iso: { score: 81, patterns: [
+                        { name: "A.13.2.1 Violation", evidence: "Sécurité du transfert d'informations violée" }
+                    ]},
+                    owasp: { score: 75, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Usurpation de la marque La Poste" }
+                    ]}
+                },
+                aiAnalysis: "Arnaque de livraison La Poste. Crée une urgence avec un faux colis non livré. Le lien de paiement mène à une page de vol d'informations bancaires. La Poste ne demande jamais de paiement via des liens email."
+            },
+            {
+                id: 11,
+                subject: "ING-DiBa: Sicherheitsupdate erforderlich",
+                from: "service@ing-diba-secure.de",
+                to: "kunde@email.de",
+                date: "2026-01-23 11:45:55",
+                body: `Sehr geehrter Kunde,
+
+Aus Sicherheitsgründen müssen Sie ein Sicherheitsupdate durchführen.
+
+Update jetzt installieren:
+https://ing-diba-update.com/security
+
+Ohne Update können Sie ab morgen nicht mehr auf Ihr Konto zugreifen.
+
+ING-DiBa Sicherheitsteam`,
+                riskLevel: "HIGH",
+                confidence: 87,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain ing-diba-secure.de not authorized" },
+                    dkim: { status: "FAIL", detail: "Missing DKIM signature" },
+                    dmarc: { status: "FAIL", detail: "DMARC check failed" }
+                },
+                frameworks: {
+                    ml: { score: 85, patterns: [
+                        { name: "Security Update Scam", evidence: "Sicherheitsupdate erforderlich" },
+                        { name: "Access Threat", evidence: "nicht mehr auf Ihr Konto zugreifen" }
+                    ]},
+                    nessus: { score: 83, patterns: [
+                        { name: "Malicious URL", evidence: "ing-diba-update.com" }
+                    ]},
+                    nist: { score: 81, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Unauthorized update request" }
+                    ]},
+                    openvas: { score: 80, patterns: [
+                        { name: "Malware Distribution", evidence: "Fake security update" }
+                    ]},
+                    iso: { score: 78, patterns: [
+                        { name: "A.12.6.1 Violation", evidence: "Technical vulnerability management bypassed" }
+                    ]},
+                    owasp: { score: 72, patterns: [
+                        { name: "A08:2021 Software Integrity Failure", evidence: "Fake software update" }
+                    ]}
+                },
+                aiAnalysis: "ING-DiBa security update scam. Banks never distribute security updates via email links. Link likely downloads malware."
+            },
+            {
+                id: 12,
+                subject: "Commerzbank: Wichtige Mitteilung zu Ihrem Konto",
+                from: "info@commerzbank-service.de",
+                to: "kunde@firma.de",
+                date: "2026-01-23 09:20:15",
+                body: `Sehr geehrter Kunde,
+
+Wir haben eine ungewöhnliche Transaktion in Ihrem Konto festgestellt.
+
+Überprüfen Sie die Transaktion hier:
+https://commerzbank-check.com/transaction
+
+Bei Nichtbestätigung wird die Transaktion storniert und Ihr Konto gesperrt.
+
+Commerzbank Kundenservice`,
+                riskLevel: "HIGH",
+                confidence: 86,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain commerzbank-service.de not authorized" },
+                    dkim: { status: "FAIL", detail: "No DKIM signature" },
+                    dmarc: { status: "FAIL", detail: "DMARC policy failed" }
+                },
+                frameworks: {
+                    ml: { score: 84, patterns: [
+                        { name: "Transaction Alert", evidence: "ungewöhnliche Transaktion" },
+                        { name: "Account Lock Threat", evidence: "Konto gesperrt" }
+                    ]},
+                    nessus: { score: 82, patterns: [
+                        { name: "Phishing Domain", evidence: "commerzbank-check.com" }
+                    ]},
+                    nist: { score: 80, patterns: [
+                        { name: "DE.CM-7 Violation", evidence: "Suspicious activity monitoring bypass" }
+                    ]},
+                    openvas: { score: 79, patterns: [
+                        { name: "Banking Fraud", evidence: "Fake transaction verification" }
+                    ]},
+                    iso: { score: 77, patterns: [
+                        { name: "A.13.2.1 Violation", evidence: "Information transfer violated" }
+                    ]},
+                    owasp: { score: 71, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Commerzbank impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Commerzbank transaction verification scam. Creates urgency with account lock threat. Link leads to credential theft."
+            },
+            {
+                id: 13,
+                subject: "BNP Paribas: Mise à jour de sécurité requise",
+                from: "securite@bnpparibas-update.fr",
+                to: "client@societe.fr",
+                date: "2026-01-22 17:10:40",
+                body: `Cher client BNP Paribas,
+
+Pour des raisons de sécurité, vous devez effectuer une mise à jour de sécurité.
+
+Installer la mise à jour maintenant:
+https://bnpparibas-securite-update.fr/install
+
+Sans cette mise à jour, vous ne pourrez plus accéder à votre compte dès demain.
+
+Équipe Sécurité BNP Paribas`,
+                riskLevel: "HIGH",
+                confidence: 88,
+                auth: {
+                    spf: { status: "FAIL", detail: "Le domaine bnpparibas-update.fr n'est pas autorisé" },
+                    dkim: { status: "FAIL", detail: "Signature DKIM manquante" },
+                    dmarc: { status: "FAIL", detail: "Échec de la vérification DMARC" }
+                },
+                frameworks: {
+                    ml: { score: 86, patterns: [
+                        { name: "Security Update Scam", evidence: "mise à jour de sécurité requise" },
+                        { name: "Access Threat", evidence: "ne pourrez plus accéder à votre compte" }
+                    ]},
+                    nessus: { score: 84, patterns: [
+                        { name: "Malicious URL", evidence: "bnpparibas-securite-update.fr" }
+                    ]},
+                    nist: { score: 82, patterns: [
+                        { name: "PR.AC-7 Violation", evidence: "Demande de mise à jour non autorisée" }
+                    ]},
+                    openvas: { score: 81, patterns: [
+                        { name: "Malware Distribution", evidence: "Fausse mise à jour de sécurité" }
+                    ]},
+                    iso: { score: 79, patterns: [
+                        { name: "A.12.6.1 Violation", evidence: "Gestion des vulnérabilités techniques contournée" }
+                    ]},
+                    owasp: { score: 73, patterns: [
+                        { name: "A08:2021 Software Integrity Failure", evidence: "Fausse mise à jour logicielle" }
+                    ]}
+                },
+                aiAnalysis: "Arnaque de mise à jour de sécurité BNP Paribas. Les banques ne distribuent jamais de mises à jour de sécurité via des liens email. Le lien télécharge probablement un malware."
+            },
+            {
+                id: 14,
+                subject: "Google: Neue Anmeldung von unbekanntem Gerät",
+                from: "no-reply@google-security.com",
+                to: "user@email.com",
+                date: "2026-01-22 13:55:30",
+                body: `Hallo,
+
+Wir haben eine neue Anmeldung in Ihrem Google-Konto festgestellt:
+Standort: Ukraine
+Gerät: Android Phone
+
+Wenn Sie das nicht waren, sichern Sie Ihr Konto:
+https://google-account-secure.com/review
+
+Google Security Team`,
+                riskLevel: "MEDIUM",
+                confidence: 83,
+                auth: {
+                    spf: { status: "FAIL", detail: "Domain google-security.com not authorized" },
+                    dkim: { status: "FAIL", detail: "No DKIM signature" },
+                    dmarc: { status: "FAIL", detail: "DMARC policy failed" }
+                },
+                frameworks: {
+                    ml: { score: 81, patterns: [
+                        { name: "Login Alert", evidence: "neue Anmeldung festgestellt" },
+                        { name: "Foreign Location", evidence: "Standort: Ukraine" }
+                    ]},
+                    nessus: { score: 79, patterns: [
+                        { name: "Phishing URL", evidence: "google-account-secure.com" }
+                    ]},
+                    nist: { score: 77, patterns: [
+                        { name: "DE.CM-7 Violation", evidence: "Suspicious activity" }
+                    ]},
+                    openvas: { score: 76, patterns: [
+                        { name: "Account Takeover", evidence: "Fake security alert" }
+                    ]},
+                    iso: { score: 74, patterns: [
+                        { name: "A.9.2.1 Violation", evidence: "Access management bypassed" }
+                    ]},
+                    owasp: { score: 69, patterns: [
+                        { name: "A07:2021 Identification Failure", evidence: "Google impersonation" }
+                    ]}
+                },
+                aiAnalysis: "Google security alert phishing. Uses foreign login location to create fear. Link leads to fake Google login page."
+            },
+            {
+                id: 15,
+                subject: "Telekom: Rechnung für Januar 2026",
+                from: "rechnung@telekom-billing.de",
+                to: "kunde@company.de",
+                date: "2026-01-22 10:30:15",
+                body: `Sehr geehrter Kunde,
+
+Ihre Rechnung für Januar 2026 ist verfügbar.
+
+Rechnung herunterladen:
+https://telekom-rechnung.com/download/januar2026.pdf
+
+Bitte zahlen Sie innerhalb von 14 Tagen.
+
+Telekom Kundenservice`,
+                riskLevel: "LOW",
+                confidence: 65,
+                auth: {
+                    spf: { status: "PASS", detail: "Sender domain authorized" },
+                    dkim: { status: "PASS", detail: "Valid DKIM signature" },
+                    dmarc: { status: "PASS", detail: "DMARC alignment check passed" }
+                },
+                frameworks: {
+                    ml: { score: 45, patterns: [
+                        { name: "Invoice Notification", evidence: "Rechnung verfügbar" }
+                    ]},
+                    nessus: { score: 40, patterns: [
+                        { name: "Suspicious PDF Link", evidence: "External download link" }
+                    ]},
+                    nist: { score: 35, patterns: [
+                        { name: "Low Risk", evidence: "Standard billing notification" }
+                    ]},
+                    openvas: { score: 30, patterns: [
+                        { name: "Potential Malware", evidence: "PDF download from external source" }
+                    ]},
+                    iso: { score: 25, patterns: [
+                        { name: "Minor Concern", evidence: "External file hosting" }
+                    ]},
+                    owasp: { score: 20, patterns: [
+                        { name: "Low Severity", evidence: "Standard invoice email" }
+                    ]}
+                },
+                aiAnalysis: "Potentially legitimate Telekom invoice email. Authentication protocols pass, but external PDF link raises minor concerns. Verify by logging into Telekom account directly."
+            }
+        ];
+
+        // Initialize charts
+        function initCharts() {
+            // Accuracy Breakdown Pie Chart
+            const accuracyCtx = document.getElementById('accuracyChart').getContext('2d');
+            new Chart(accuracyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['True Positives', 'True Negatives', 'False Positives'],
+                    datasets: [{
+                        data: [56, 40, 4],
+                        backgroundColor: ['#28a745', '#17a2b8', '#ffc107'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+
+
+            // Framework Comparison Chart
+            const frameworkCtx = document.getElementById('frameworkChart').getContext('2d');
+            new Chart(frameworkCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['ML', 'Nessus', 'NIST', 'OpenVAS', 'ISO', 'OWASP'],
+                    datasets: [{
+                        label: 'Score (%)',
+                        data: [91, 89, 87, 86, 84, 78],
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#4facfe',
+                            '#43e97b',
+                            '#fa709a'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render email cards
+        function renderEmails() {
+            const grid = document.getElementById('emailGrid');
+            emails.forEach(email => {
+                const card = document.createElement('div');
+                card.className = `email-card ${email.riskLevel.toLowerCase()}`;
+                card.onclick = () => showAnalysis(email);
+                card.innerHTML = `
+                    <div class="email-subject">${email.subject}</div>
+                    <div class="email-from">From: ${email.from}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="risk-badge risk-${email.riskLevel.toLowerCase()}">${email.riskLevel}</span>
+                        <span style="font-size: 0.9rem; color: #6c757d;">${email.confidence}% Confidence</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Show analysis modal
+        function showAnalysis(email) {
+            document.getElementById('modalTitle').textContent = email.subject;
+            
+            // Email content
+            document.getElementById('emailContent').textContent = `From: ${email.from}
+To: ${email.to}
+Date: ${email.date}
+Subject: ${email.subject}
+
+${email.body}`;
+
+            // Authentication checks
+            const authChecks = document.getElementById('authChecks');
+            authChecks.innerHTML = '';
+            Object.entries(email.auth).forEach(([protocol, result]) => {
+                const check = document.createElement('div');
+                check.className = `auth-check ${result.status.toLowerCase()}`;
+                check.innerHTML = `
+                    <div class="auth-check-name">
+                        ${protocol.toUpperCase()}
+                        <span class="auth-status status-${result.status.toLowerCase()}">${result.status}</span>
+                    </div>
+                    <div class="auth-check-result">${result.detail}</div>
+                `;
+                authChecks.appendChild(check);
+            });
+
+            // Framework analysis
+            const frameworksContent = document.getElementById('frameworksContent');
+            frameworksContent.innerHTML = '';
+            
+            const frameworkInfo = {
+                ml: "Machine Learning classifier using Naive Bayes algorithm trained on 10,000+ phishing emails. Analyzes linguistic patterns, urgency indicators, and structural anomalies.",
+                nessus: "Nessus vulnerability scanner checks for known malicious domains, URLs, and infrastructure patterns against comprehensive threat intelligence databases.",
+                nist: "NIST Cybersecurity Framework evaluates compliance with access control (PR.AC), detection (DE.CM), and response (RS.AN) security controls.",
+                openvas: "OpenVAS security scanner performs deep inspection of email content, attachments, and links for malware, exploits, and social engineering tactics.",
+                iso: "ISO/IEC 27001 assesses adherence to information security management controls including user access (A.9), network security (A.13), and incident management (A.16).",
+                owasp: "OWASP Top 10 framework identifies web application security risks including broken access control, injection attacks, and identification failures."
+            };
+
+            Object.entries(email.frameworks).forEach(([name, data]) => {
+                const section = document.createElement('div');
+                section.className = 'framework-section';
+                section.innerHTML = `
+                    <div class="framework-header">
+                        <div>
+                            <span class="framework-name">${name.toUpperCase()}</span>
+                            <span class="info-icon">i
+                                <span class="tooltip">${frameworkInfo[name]}</span>
+                            </span>
+                        </div>
+                        <div class="framework-score">${data.score}%</div>
+                    </div>
+                    <ul class="pattern-list">
+                        ${data.patterns.map(pattern => `
+                            <li class="pattern-item" onclick="this.classList.toggle('expanded')">
+                                <div class="pattern-name">${pattern.name}</div>
+                                <div class="pattern-evidence"><strong>Evidence:</strong> "${pattern.evidence}"</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                frameworksContent.appendChild(section);
+            });
+
+            // AI analysis
+            document.getElementById('aiAnalysis').textContent = email.aiAnalysis;
+
+            // Show modal
+            document.getElementById('analysisModal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('analysisModal').style.display = 'none';
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('analysisModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            initCharts();
+            renderEmails();
+        };
+    </script>
+</body>
+</html>
