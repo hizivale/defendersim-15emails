@@ -447,7 +447,7 @@
 <body>
     <div class="header">
         <h1>DefenderSim - AI-Powered Phishing Detection System</h1>
-        <p>6 Security Frameworks + Ollama LLM (Llama 3.2:3b) with RAG for Intelligent Analysis</p>
+        <p>4 Security Frameworks + 2 Vulnerability Scanners + Ollama LLM (Llama 3.2:3b) with RAG for Intelligent Analysis</p>
     </div>
 
     <div class="container">
@@ -481,15 +481,15 @@
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <div style="flex: 1; min-width: 200px;">
                     <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
-                        <strong>Step 1: Multi-Framework Detection</strong><br>
-                        <span style="font-size: 0.9rem;">ML Classifier, OWASP, NIST, ISO, Nessus, OpenVAS analyze email</span>
+                        <strong>Step 1: Multi-Framework and Detection</strong><br>
+                        <span style="font-size: 0.9rem;">Frameworks (ML, OWASP, NIST, ISO) + Scanners (Nessus, OpenVAS) analyze email</span>
                     </div>
                 </div>
                 <div style="font-size: 2rem; opacity: 0.8;">→</div>
                 <div style="flex: 1; min-width: 200px;">
                     <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
                         <strong>Step 2: Ollama LLM (Llama 3.2:3b)</strong><br>
-                        <span style="font-size: 0.9rem;">RAG-enhanced AI synthesizes all framework results</span>
+                        <span style="font-size: 0.9rem;">RAG-enhanced AI synthesizes all framework and scanner results</span>
                     </div>
                 </div>
                 <div style="font-size: 2rem; opacity: 0.8;">→</div>
@@ -514,7 +514,7 @@
                     <canvas id="accuracyChart" height="250"></canvas>
                 </div>
                 <div class="chart-container">
-                    <div class="chart-title">Framework Comparison</div>
+                    <div class="chart-title">Framework and Scanner Comparison</div>
                     <canvas id="frameworkChart" height="250"></canvas>
                 </div>
             </div>
@@ -536,7 +536,7 @@
                 <div class="tabs">
                     <div class="tab active" onclick="switchTab('email')">Email Content</div>
                     <div class="tab" onclick="switchTab('auth')">Authentication</div>
-                    <div class="tab" onclick="switchTab('frameworks')">Framework Analysis</div>
+                    <div class="tab" onclick="switchTab('frameworks')">Framework and Scanner Analysis</div>
                     <div class="tab" onclick="switchTab('ai')">Ollama LLM Analysis</div>
                 </div>
 
@@ -566,7 +566,7 @@
                 <div id="aiTab" class="tab-content">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 6px 6px 0 0; margin-bottom: 0;">
                         <h3 style="margin: 0; font-size: 1.1rem;">Ollama LLM Synthesis (Llama 3.2:3b with RAG)</h3>
-                        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.95;">The LLM analyzes all 6 framework results and generates a comprehensive human-readable threat assessment</p>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.95;">The LLM analyzes all framework and scanner results and generates a comprehensive human-readable threat assessment</p>
                     </div>
                     <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 0 0 6px 6px; line-height: 1.8;">
                         <p id="aiAnalysis"></p>

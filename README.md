@@ -47,19 +47,19 @@ Then visit: http://localhost:3000
 
 - Complete email body content
 - Full authentication results (DMARC/SPF/DKIM)
-- All 6 framework analyses:
-  1. ML Classifier (Naive Bayes + TF-IDF)
-  2. OWASP Top 10
-  3. NIST Cybersecurity Framework
-  4. ISO/IEC 27001
-  5. Nessus Vulnerability Scanner
-  6. OpenVAS
+- All 4 security frameworks + 2 vulnerability scanners:
+  1. ML Classifier (Naive Bayes + TF-IDF) - Framework
+  2. OWASP Top 10 - Framework
+  3. NIST Cybersecurity Framework - Framework
+  4. ISO/IEC 27001 - Framework
+  5. Nessus - Vulnerability Scanner
+  6. OpenVAS - Vulnerability Scanner
 - Comprehensive Ollama LLM analysis with reasoning
 
 ### Interactive Features:
 
 - Click any email card to view detailed analysis
-- 4 tabs: Email Content, Authentication, Framework Analysis, Ollama LLM Analysis
+- 4 tabs: Email Content, Authentication, Framework and Scanner Analysis, Ollama LLM Analysis
 - Filter by risk level (HIGH, MEDIUM, LOW)
 - Filter by language (German, English, French)
 - Responsive design (works on phone, tablet, desktop)
@@ -78,20 +78,24 @@ Then visit: http://localhost:3000
 
 ## How It Works
 
-### 1. Multi-Framework Detection
+### 1. Multi-Framework and Detection
 
-Six independent security frameworks analyze each email:
+Four security frameworks and two vulnerability scanners analyze each email:
+
+**Security Frameworks:**
 - **ML Classifier:** Text analysis using machine learning
-- **OWASP:** Web security vulnerabilities
+- **OWASP Top 10:** Web security vulnerabilities
 - **NIST CSF:** Authentication and sender reputation
 - **ISO/IEC 27001:** Information security standards
-- **Nessus:** Enterprise-grade vulnerability detection
-- **OpenVAS:** Open-source security scanning
+
+**Vulnerability Scanners:**
+- **Nessus:** Enterprise-grade vulnerability detection patterns
+- **OpenVAS:** Open-source security scanning patterns
 
 ### 2. Ollama LLM Synthesis
 
 Ollama Llama 3.2:3b with RAG (Retrieval-Augmented Generation):
-- Reads all 6 framework results
+- Reads all framework and scanner results
 - References known phishing patterns
 - Generates human-readable explanation
 - Provides actionable recommendations
@@ -101,7 +105,7 @@ Ollama Llama 3.2:3b with RAG (Retrieval-Augmented Generation):
 - Email cards with risk indicators
 - Detailed analysis modal with tabs
 - Charts showing detection accuracy
-- Framework comparison visualization
+- Framework and scanner comparison visualization
 
 ---
 
@@ -205,7 +209,7 @@ Ollama Llama 3.2:3b with RAG (Retrieval-Augmented Generation):
 
 This demo shows:
 
-1. **Multi-framework approach** - 6 different detection methods
+1. **Multi-framework and detection approach** - 4 frameworks + 2 scanners = 6 detection methods
 2. **AI/LLM integration** - Ollama synthesizes results
 3. **Multilingual capability** - Works in German, English, French
 4. **Professional UI** - Clean, responsive, interactive
