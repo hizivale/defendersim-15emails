@@ -213,6 +213,60 @@
             opacity: 0.8;
         }
 
+        /* Tooltip styles for metric explanations */
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            text-align: center;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: help;
+            margin-left: 5px;
+            position: relative;
+        }
+
+        .info-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: normal;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .info-icon:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .info-icon:hover::after {
+                white-space: normal;
+                max-width: 200px;
+                left: auto;
+                right: 0;
+                transform: none;
+            }
+        }
+
         .modal-body {
             padding: 2rem;
         }
@@ -454,24 +508,24 @@
         <!-- Dashboard Statistics -->
         <div class="dashboard-grid">
             <div class="stat-card">
-                <div class="stat-label">Overall Accuracy</div>
+                <div class="stat-label">Overall Accuracy <span class="info-icon" data-tooltip="Percentage of emails correctly classified (both phishing and legitimate)">i</span></div>
                 <div class="stat-value">96%</div>
                 <div class="stat-label">14/15 Emails Correctly Classified</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Precision</div>
+                <div class="stat-label">Precision <span class="info-icon" data-tooltip="Of all emails flagged as phishing, how many are actually phishing">i</span></div>
                 <div class="stat-value">93.3%</div>
                 <div class="stat-label">14/15 True Positives</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Recall</div>
+                <div class="stat-label">Recall <span class="info-icon" data-tooltip="Of all actual phishing emails, how many were detected (no false negatives)">i</span></div>
                 <div class="stat-value">100%</div>
                 <div class="stat-label">All Phishing Detected</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">F1 Score</div>
+                <div class="stat-label">F1 Score <span class="info-icon" data-tooltip="Balanced measure: 2 × (Precision × Recall) / (Precision + Recall)">i</span></div>
                 <div class="stat-value">96.5%</div>
-                <div class="stat-label">Harmonic Mean</div>
+                <div class="stat-label">Harmonic Mean of Precision & Recall</div>
             </div>
         </div>
 
@@ -1412,8 +1466,8 @@ Telekom Kundenservice`,
                     <div class="email-subject">${email.subject}</div>
                     <div class="email-from">From: ${email.from}</div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="risk-badge risk-${email.riskLevel.toLowerCase()}">${email.riskLevel}</span>
-                        <span style="font-size: 0.9rem; color: #6c757d;">${email.confidence}% Confidence</span>
+                        <span class="risk-badge risk-${email.riskLevel.toLowerCase()}" title="Risk based on: Authentication (SPF/DKIM/DMARC) + Framework scores + Threat indicators">${email.riskLevel}</span>
+                        <span style="font-size: 0.9rem; color: #6c757d;" title="Confidence based on: Framework agreement + Indicator strength + Auth results">${email.confidence}% Confidence</span>
                     </div>
                 `;
                 grid.appendChild(card);
