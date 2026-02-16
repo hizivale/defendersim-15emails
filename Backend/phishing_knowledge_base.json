@@ -1,0 +1,133 @@
+[
+  {
+    "example": "URGENT: Your account will be suspended in 24 hours. Verify now: http://verify-account.ru",
+    "type": "phishing",
+    "explanation": "Uses urgent language ('URGENT', '24 hours') to create pressure. Suspicious .ru domain. Requests verification which is a common phishing tactic.",
+    "indicators": [
+      "urgency",
+      "suspicious_domain",
+      "verification_request"
+    ],
+    "confidence": 0.95
+  },
+  {
+    "example": "Dear valued customer, please confirm your credit card details to continue service.",
+    "type": "phishing",
+    "explanation": "Generic greeting ('valued customer') instead of personalized. Requests sensitive financial information (credit card).",
+    "indicators": [
+      "generic_greeting",
+      "financial_info_request"
+    ],
+    "confidence": 0.9
+  },
+  {
+    "example": "CEO: I need you to wire $50,000 to our vendor immediately. This is confidential.",
+    "type": "phishing",
+    "explanation": "Business Email Compromise (BEC) attack. Impersonates authority figure. Requests wire transfer. Uses confidentiality to prevent verification.",
+    "indicators": [
+      "authority_impersonation",
+      "wire_transfer",
+      "confidentiality_pressure"
+    ],
+    "confidence": 0.98
+  },
+  {
+    "example": "Your package could not be delivered. Pay customs fee: http://dhl-delivery.biz",
+    "type": "phishing",
+    "explanation": "Fake delivery notification. Suspicious domain (.biz instead of official .com). Requests payment for fake customs fee.",
+    "indicators": [
+      "fake_delivery",
+      "suspicious_domain",
+      "payment_request"
+    ],
+    "confidence": 0.92
+  },
+  {
+    "example": "You have won $1,000,000 in the lottery! Claim your prize now.",
+    "type": "phishing",
+    "explanation": "Classic lottery scam. Unrealistic prize. No legitimate lottery notifies winners via email.",
+    "indicators": [
+      "lottery_scam",
+      "unrealistic_prize",
+      "urgency"
+    ],
+    "confidence": 0.99
+  },
+  {
+    "example": "Hi team, reminder about our meeting tomorrow at 2 PM in Conference Room B.",
+    "type": "legitimate",
+    "explanation": "Professional tone. Specific details (time, location). No suspicious links or requests. Common workplace communication.",
+    "indicators": [
+      "professional_tone",
+      "specific_details",
+      "no_requests"
+    ],
+    "confidence": 0.95
+  },
+  {
+    "example": "Your monthly invoice for January is attached. Payment due within 30 days.",
+    "type": "legitimate",
+    "explanation": "Standard business communication. Clear purpose. Reasonable payment terms. No urgency or threats.",
+    "indicators": [
+      "business_communication",
+      "clear_purpose",
+      "reasonable_terms"
+    ],
+    "confidence": 0.9
+  },
+  {
+    "example": "Security alert: We detected a login from a new device in California. If this wasn't you, secure your account.",
+    "type": "legitimate",
+    "explanation": "Legitimate security notification. Provides specific location. Doesn't force immediate action. Offers option to secure account.",
+    "indicators": [
+      "security_notification",
+      "specific_details",
+      "optional_action"
+    ],
+    "confidence": 0.85
+  },
+  {
+    "example": "Download this patch to fix the security vulnerability: http://microsoft-update.net/patch.exe",
+    "type": "phishing",
+    "explanation": "Fake security update. Suspicious domain (not official microsoft.com). Executable file (.exe) is dangerous. Legitimate updates come through official channels.",
+    "indicators": [
+      "fake_update",
+      "suspicious_domain",
+      "executable_file"
+    ],
+    "confidence": 0.97
+  },
+  {
+    "example": "Your Netflix subscription will expire tomorrow. Update payment: http://netflix-renew.org",
+    "type": "phishing",
+    "explanation": "Fake subscription renewal. Suspicious domain (.org instead of .com). Creates urgency ('tomorrow'). Legitimate Netflix uses official domain.",
+    "indicators": [
+      "fake_subscription",
+      "suspicious_domain",
+      "urgency"
+    ],
+    "confidence": 0.94
+  },
+  {
+    "example": "IRS Tax Refund: You are eligible for a $2,500 refund. Claim here: http://irs-refund.gov.ru",
+    "type": "phishing",
+    "explanation": "Impersonates government agency (IRS). Suspicious domain (.gov.ru - mixing US and Russian TLDs). IRS doesn't initiate contact via email for refunds.",
+    "indicators": [
+      "government_impersonation",
+      "suspicious_domain",
+      "unsolicited_refund"
+    ],
+    "confidence": 0.99
+  },
+  {
+    "example": "As an AI language model, I cannot access your account. Please verify your identity.",
+    "type": "phishing",
+    "explanation": "AI-generated phishing attempt. Contains AI disclosure phrases ('As an AI'). Legitimate companies don't use AI-generated customer service emails.",
+    "indicators": [
+      "ai_generated",
+      "verification_request",
+      "unusual_phrasing"
+    ],
+    "confidence": 0.88
+  }
+]
