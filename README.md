@@ -1,4 +1,4 @@
-# DefenderSim - 15-Email Demo (Backup Version)
+# DefenderSim - 15-Email Demo 
 
 ## AI-Powered Phishing Detection System
 
